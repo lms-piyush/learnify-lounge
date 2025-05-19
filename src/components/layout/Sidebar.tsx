@@ -9,14 +9,14 @@ import {
   SidebarMenuItem, 
   SidebarMenuButton
 } from "@/components/ui/sidebar";
-import { Dashboard, Book, Compass, HelpCircle, LogOut } from "lucide-react";
+import { LayoutDashboard, Book, Compass, HelpCircle, LogOut } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 
   const menuItems = [
-    { icon: Dashboard, label: "Dashboard", path: "/" },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/" },
     { icon: Book, label: "My Classes", path: "/my-classes" },
     { icon: Compass, label: "Explore Classes", path: "/explore" },
     { icon: HelpCircle, label: "Help", path: "/help" },
