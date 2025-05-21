@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Help from "./pages/Help";
 import Messages from "./pages/Messages";
 import TutorProfile from "./pages/TutorProfile";
+import CourseCheckout from "./pages/CourseCheckout";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/my-classes" element={<MyClasses />} />
           <Route path="/explore" element={<ExploreClasses />} />
           <Route path="/classes/:id" element={<ClassDetail />} />
+          <Route path="/checkout/:id" element={<CourseCheckout />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/help" element={<Help />} />
           <Route path="/messages" element={<Messages />} />

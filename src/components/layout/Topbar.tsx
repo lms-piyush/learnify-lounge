@@ -1,8 +1,8 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Bell, Search, User, MessagesSquare } from "lucide-react";
+import { Bell, Search, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,8 +12,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Topbar = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+
+  // Dummy search results for "advanced" keyword
+  const searchResults = [
+    { id: "adv1", title: "Advanced Mathematics", tutor: "Prof. Johnson" },
+    { id: "adv2", title: "Advanced Python Programming", tutor: "Dr. Smith" },
+    { id: "adv3", title: "Advanced Data Structures", tutor: "Sarah Lee" },
+    { id: "adv4", title: "Advanced UI/UX Design", tutor: "Michael Chen" },
+    { id: "adv5", title: "Advanced Machine Learning", tutor: "Emma Watson" }
+  ];
+
+  const shouldShowResults = searchQuery.toLowerCase().includes("advanced");
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/explore?search=${encodeURIComponent(searchQuery)}`);
+      setIsSearching(false);
+    }
+  };
 
   return (
     <div className="sticky top-0 z-10 bg-white border-b border-gray-200 h-16 flex items-center px-6">
@@ -30,17 +49,41 @@ const Topbar = () => {
               setSearchQuery(e.target.value);
               setIsSearching(e.target.value.length > 0);
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
           />
         </div>
 
-        {/* Search Results Dropdown */}
-        {isSearching && (
+        {/* Search Results Dropdown - Show when typing "advanced" */}
+        {isSearching && shouldShowResults && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 p-2">
             <div className="py-2">
-              <p className="px-3 text-sm font-medium text-gray-500">No results found</p>
+              {searchResults.map((result) => (
+                <div 
+                  key={result.id}
+                  className="px-3 py-2 hover:bg-[#E5D0FF] rounded cursor-pointer"
+                  onClick={() => {
+                    navigate(`/explore?search=advanced`);
+                    setIsSearching(false);
+                  }}
+                >
+                  <p className="font-medium">{result.title}</p>
+                  <p className="text-sm text-gray-500">By {result.tutor}</p>
+                </div>
+              ))}
             </div>
             <div className="pt-2 border-t border-gray-100">
-              <Button variant="link" className="w-full justify-center text-[#8A5BB7]">
+              <Button 
+                variant="link" 
+                className="w-full justify-center text-[#8A5BB7]"
+                onClick={() => {
+                  navigate(`/explore?search=advanced`);
+                  setIsSearching(false);
+                }}
+              >
                 View All Results
               </Button>
             </div>

@@ -48,12 +48,12 @@ const tutorData = {
       { month: 'Jun', students: 58 }
     ],
     ratings: [
-      { month: 'Jan', rating: 4.6 },
-      { month: 'Feb', rating: 4.7 },
-      { month: 'Mar', rating: 4.7 },
-      { month: 'Apr', rating: 4.8 },
-      { month: 'May', rating: 4.9 },
-      { month: 'Jun', rating: 4.8 }
+      { month: 'Jan', offlineRating: 4.5, onlineRating: 4.6 },
+      { month: 'Feb', offlineRating: 4.6, onlineRating: 4.7 },
+      { month: 'Mar', offlineRating: 4.6, onlineRating: 4.7 },
+      { month: 'Apr', offlineRating: 4.7, onlineRating: 4.8 },
+      { month: 'May', offlineRating: 4.8, onlineRating: 4.9 },
+      { month: 'Jun', offlineRating: 4.7, onlineRating: 4.8 }
     ]
   },
   tutor2: {
@@ -76,12 +76,12 @@ const tutorData = {
       { month: 'Jun', students: 52 }
     ],
     ratings: [
-      { month: 'Jan', rating: 4.5 },
-      { month: 'Feb', rating: 4.5 },
-      { month: 'Mar', rating: 4.6 },
-      { month: 'Apr', rating: 4.6 },
-      { month: 'May', rating: 4.7 },
-      { month: 'Jun', rating: 4.6 }
+      { month: 'Jan', offlineRating: 4.4, onlineRating: 4.5 },
+      { month: 'Feb', offlineRating: 4.4, onlineRating: 4.5 },
+      { month: 'Mar', offlineRating: 4.5, onlineRating: 4.6 },
+      { month: 'Apr', offlineRating: 4.5, onlineRating: 4.6 },
+      { month: 'May', offlineRating: 4.6, onlineRating: 4.7 },
+      { month: 'Jun', offlineRating: 4.5, onlineRating: 4.6 }
     ]
   },
   tutor3: {
@@ -104,12 +104,12 @@ const tutorData = {
       { month: 'Jun', students: 72 }
     ],
     ratings: [
-      { month: 'Jan', rating: 4.8 },
-      { month: 'Feb', rating: 4.8 },
-      { month: 'Mar', rating: 4.9 },
-      { month: 'Apr', rating: 4.9 },
-      { month: 'May', rating: 4.9 },
-      { month: 'Jun', rating: 5.0 }
+      { month: 'Jan', offlineRating: 4.7, onlineRating: 4.8 },
+      { month: 'Feb', offlineRating: 4.7, onlineRating: 4.8 },
+      { month: 'Mar', offlineRating: 4.8, onlineRating: 4.9 },
+      { month: 'Apr', offlineRating: 4.8, onlineRating: 4.9 },
+      { month: 'May', offlineRating: 4.8, onlineRating: 4.9 },
+      { month: 'Jun', offlineRating: 4.9, onlineRating: 5.0 }
     ]
   }
 };
@@ -311,9 +311,17 @@ const TutorProfile = () => {
                   <Legend />
                   <Line 
                     type="monotone" 
-                    dataKey="rating" 
-                    name="Average Rating"
+                    dataKey="onlineRating" 
+                    name="Online Classes"
                     stroke="#8A5BB7" 
+                    activeDot={{ r: 8 }} 
+                    strokeWidth={2}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="offlineRating" 
+                    name="Offline Classes"
+                    stroke="#36A2EB" 
                     activeDot={{ r: 8 }} 
                     strokeWidth={2}
                   />
@@ -321,15 +329,6 @@ const TutorProfile = () => {
               </ResponsiveContainer>
             </CardContent>
           </Card>
-        </div>
-        
-        <div className="flex justify-center">
-          <Button 
-            className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
-            onClick={() => navigate(`/messages`)}
-          >
-            Message Tutor
-          </Button>
         </div>
       </div>
     </Layout>

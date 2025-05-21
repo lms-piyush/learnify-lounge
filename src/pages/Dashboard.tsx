@@ -138,7 +138,7 @@ const Dashboard = () => {
         {/* Course Distribution Chart */}
         <CourseDistributionChart data={chartData} totalCourses={totalCourses} />
         
-        {/* New Courses Section */}
+        {/* New Courses Section (renamed from Popular Courses) */}
         <div className="lg:col-span-2">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">New Courses</h2>
@@ -151,7 +151,7 @@ const Dashboard = () => {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[220px]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[220px] overflow-hidden">
             {newCourses.map((course) => (
               <CourseCard
                 key={course.id}
