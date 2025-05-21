@@ -20,8 +20,76 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { User, CreditCard, Shield, AlertTriangle } from "lucide-react";
+import { 
+  User, 
+  CreditCard, 
+  Shield, 
+  AlertTriangle, 
+  Upload,
+  Edit,
+  Eye,
+  EyeOff 
+} from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
+  Form, 
+  FormField, 
+  FormItem, 
+  FormLabel, 
+  FormControl 
+} from "@/components/ui/form";
+
+const countries = [
+  { value: "usa", label: "United States" },
+  { value: "canada", label: "Canada" },
+  { value: "uk", label: "United Kingdom" },
+  { value: "australia", label: "Australia" },
+  { value: "india", label: "India" },
+];
+
+const statesByCountry = {
+  usa: [
+    { value: "ca", label: "California" },
+    { value: "ny", label: "New York" },
+    { value: "tx", label: "Texas" },
+    { value: "fl", label: "Florida" },
+  ],
+  canada: [
+    { value: "on", label: "Ontario" },
+    { value: "bc", label: "British Columbia" },
+    { value: "qc", label: "Quebec" },
+  ],
+  uk: [
+    { value: "eng", label: "England" },
+    { value: "sct", label: "Scotland" },
+    { value: "wls", label: "Wales" },
+  ],
+  australia: [
+    { value: "nsw", label: "New South Wales" },
+    { value: "qld", label: "Queensland" },
+    { value: "vic", label: "Victoria" },
+  ],
+  india: [
+    { value: "mh", label: "Maharashtra" },
+    { value: "dl", label: "Delhi" },
+    { value: "ka", label: "Karnataka" },
+  ],
+};
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -30,9 +98,11 @@ const Profile = () => {
     name: "John Smith",
     email: "john.smith@example.com",
     age: "25",
-    state: "California",
-    country: "USA",
-    paymentMethod: "Credit Card",
+    country: "usa",
+    state: "ca",
+    city: "San Francisco",
+    pincode: "94103",
+    address: "123 Main St",
   });
   
   const [notificationPreferences, setNotificationPreferences] = useState({
@@ -40,6 +110,27 @@ const Profile = () => {
     upcomingClasses: true,
     newFeatures: false,
     promotions: false,
+  });
+  
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+  });
+  
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  
+  const [uploadPhotoDialogOpen, setUploadPhotoDialogOpen] = useState(false);
+  const [confirmationModalOpen, setConfirmationModalOpen] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [addPaymentMethodDialogOpen, setAddPaymentMethodDialogOpen] = useState(false);
+  
+  const [paymentMethods, setPaymentMethods] = useState<Array<{ type: string; last4: string; expiry: string }>>([]);
+  const [newCardData, setNewCardData] = useState({
+    cardNumber: "",
+    expiry: "",
+    cvc: "",
+    name: ""
   });
   
   const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +141,21 @@ const Profile = () => {
     });
   };
   
+  const handleCountryChange = (value: string) => {
+    setProfileData({
+      ...profileData,
+      country: value,
+      state: statesByCountry[value as keyof typeof statesByCountry][0].value,
+    });
+  };
+  
+  const handleStateChange = (value: string) => {
+    setProfileData({
+      ...profileData,
+      state: value,
+    });
+  };
+  
   const handleNotificationChange = (name: string, value: boolean) => {
     setNotificationPreferences({
       ...notificationPreferences,
@@ -57,17 +163,80 @@ const Profile = () => {
     });
   };
   
-  const handleAddPaymentMethod = () => {
-    toast({
-      title: "Payment method added",
-      description: "Your new payment method has been added successfully."
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData({
+      ...passwordData,
+      [name]: value,
     });
+  };
+  
+  const handleUploadPhoto = (type: string) => {
+    // In a real app, we would handle the photo upload here
+    setUploadPhotoDialogOpen(false);
+    
+    setConfirmationMessage("Profile photo has been uploaded successfully.");
+    setConfirmationModalOpen(true);
+    
+    setTimeout(() => {
+      setConfirmationModalOpen(false);
+    }, 5000);
+  };
+  
+  const handleSaveProfile = () => {
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been updated successfully."
+    });
+  };
+  
+  const handleAddPaymentMethod = () => {
+    // In a real app, we would process the payment information here
+    setPaymentMethods([
+      ...paymentMethods,
+      {
+        type: "Visa",
+        last4: newCardData.cardNumber.slice(-4),
+        expiry: newCardData.expiry
+      }
+    ]);
+    
+    setAddPaymentMethodDialogOpen(false);
+    
+    setConfirmationMessage("Your new payment method has been added successfully.");
+    setConfirmationModalOpen(true);
+    
+    setTimeout(() => {
+      setConfirmationModalOpen(false);
+    }, 5000);
+    
+    // Reset form
+    setNewCardData({
+      cardNumber: "",
+      expiry: "",
+      cvc: "",
+      name: ""
+    });
+  };
+  
+  const handleSavePreferences = () => {
+    setConfirmationMessage("Your preferences have been saved successfully.");
+    setConfirmationModalOpen(true);
+    
+    setTimeout(() => {
+      setConfirmationModalOpen(false);
+    }, 5000);
   };
   
   const handleChangePassword = () => {
     toast({
       title: "Password changed",
       description: "Your password has been changed successfully."
+    });
+    
+    setPasswordData({
+      currentPassword: "",
+      newPassword: ""
     });
   };
   
@@ -123,10 +292,31 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex justify-center mb-6">
-                <div className="h-24 w-24 rounded-full bg-[#8A5BB7] flex items-center justify-center text-white text-2xl">
-                  <User className="h-12 w-12" />
+              <div className="flex flex-col items-center mb-6">
+                <div className="relative">
+                  <div className="h-24 w-24 rounded-full bg-[#8A5BB7] flex items-center justify-center text-white text-2xl">
+                    {profileData.name ? (
+                      profileData.name.charAt(0)
+                    ) : (
+                      <User className="h-12 w-12" />
+                    )}
+                  </div>
+                  <Button 
+                    size="icon"
+                    variant="outline" 
+                    className="absolute bottom-0 right-0 rounded-full bg-white hover:bg-[#E5D0FF] border border-gray-300"
+                    onClick={() => setUploadPhotoDialogOpen(true)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
                 </div>
+                <Button
+                  onClick={() => setUploadPhotoDialogOpen(true)}
+                  className="mt-4 bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Picture
+                </Button>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -159,44 +349,119 @@ const Profile = () => {
                     onChange={handleProfileChange}
                   />
                 </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Select 
+                    value={profileData.country} 
+                    onValueChange={handleCountryChange}
+                  >
+                    <SelectTrigger id="country">
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {countries.map((country) => (
+                        <SelectItem key={country.value} value={country.value}>
+                          {country.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="state">State</Label>
+                  <Select 
+                    value={profileData.state} 
+                    onValueChange={handleStateChange}
+                  >
+                    <SelectTrigger id="state">
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {profileData.country && statesByCountry[profileData.country as keyof typeof statesByCountry]?.map((state) => (
+                        <SelectItem key={state.value} value={state.value}>
+                          {state.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
                   <Input
-                    id="state"
-                    name="state"
-                    value={profileData.state}
+                    id="city"
+                    name="city"
+                    value={profileData.city}
                     onChange={handleProfileChange}
                   />
                 </div>
+                
                 <div className="space-y-2">
-                  <Label htmlFor="country">Country</Label>
+                  <Label htmlFor="pincode">Pincode</Label>
                   <Input
-                    id="country"
-                    name="country"
-                    value={profileData.country}
+                    id="pincode"
+                    name="pincode"
+                    value={profileData.pincode}
+                    onChange={handleProfileChange}
+                  />
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="address">Complete Address</Label>
+                  <Input
+                    id="address"
+                    name="address"
+                    value={profileData.address}
                     onChange={handleProfileChange}
                   />
                 </div>
               </div>
               
+              <div className="flex justify-end">
+                <Button 
+                  onClick={handleSaveProfile}
+                  className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+                >
+                  Save Changes
+                </Button>
+              </div>
+              
               <div className="pt-4 border-t">
                 <h3 className="text-lg font-medium mb-4">Payment Method</h3>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <CreditCard className="mr-2 h-5 w-5 text-[#8A5BB7]" />
-                    <span>{profileData.paymentMethod}</span>
+                {paymentMethods.length > 0 ? (
+                  <div className="space-y-3">
+                    {paymentMethods.map((method, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center">
+                          <CreditCard className="mr-2 h-5 w-5 text-[#8A5BB7]" />
+                          <span>{method.type} •••• {method.last4} (expires {method.expiry})</span>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex justify-start mt-3">
+                      <Button 
+                        onClick={() => setAddPaymentMethodDialogOpen(true)} 
+                        variant="outline"
+                      >
+                        Add New Method
+                      </Button>
+                    </div>
                   </div>
-                  <Button onClick={handleAddPaymentMethod} variant="outline">
-                    Add New Method
-                  </Button>
-                </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <p className="text-muted-foreground">No payment methods added</p>
+                    <Button 
+                      onClick={() => setAddPaymentMethodDialogOpen(true)} 
+                      variant="outline"
+                    >
+                      Add New Method
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90">
-                Save Changes
-              </Button>
-            </CardFooter>
           </Card>
         </TabsContent>
         
@@ -277,7 +542,10 @@ const Profile = () => {
               </div>
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Button className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90">
+              <Button 
+                onClick={handleSavePreferences}
+                className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+              >
                 Save Preferences
               </Button>
             </CardFooter>
@@ -300,11 +568,53 @@ const Profile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="current-password">Current Password</Label>
-                      <Input id="current-password" type="password" />
+                      <div className="relative">
+                        <Input 
+                          id="current-password" 
+                          name="currentPassword"
+                          type={showCurrentPassword ? "text" : "password"} 
+                          value={passwordData.currentPassword}
+                          onChange={handlePasswordChange}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        >
+                          {showCurrentPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="new-password">New Password</Label>
-                      <Input id="new-password" type="password" />
+                      <div className="relative">
+                        <Input 
+                          id="new-password" 
+                          name="newPassword"
+                          type={showNewPassword ? "text" : "password"} 
+                          value={passwordData.newPassword}
+                          onChange={handlePasswordChange}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                        >
+                          {showNewPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   <Button 
@@ -348,24 +658,155 @@ const Profile = () => {
             <CardFooter className="flex flex-col">
               <div className="w-full pt-4 border-t">
                 <div className="space-y-2">
-                  <h3 className="text-base font-medium text-red-600">Danger Zone</h3>
+                  <h3 className="text-base font-medium text-red-600">Deactivate Account</h3>
                   <p className="text-sm text-muted-foreground">
                     Once you deactivate your account, you will lose access to all your classes and progress.
                   </p>
-                  <Button 
-                    variant="destructive" 
-                    onClick={handleDeactivateAccount}
-                    className="w-full"
-                  >
-                    <AlertTriangle className="mr-2 h-4 w-4" />
-                    Deactivate Account
-                  </Button>
+                  <div className="flex justify-start">
+                    <Button 
+                      variant="destructive" 
+                      onClick={handleDeactivateAccount}
+                      className="flex items-center"
+                    >
+                      <AlertTriangle className="mr-2 h-4 w-4" />
+                      Deactivate Account
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
+      
+      {/* Upload Photo Dialog */}
+      <Dialog open={uploadPhotoDialogOpen} onOpenChange={setUploadPhotoDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload Profile Picture</DialogTitle>
+            <DialogDescription>
+              Choose how you want to upload your profile picture
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-4">
+            <Button
+              onClick={() => handleUploadPhoto("device")}
+              className="h-20 flex flex-col items-center justify-center bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+            >
+              <Upload className="h-6 w-6 mb-2" />
+              Upload from Device
+            </Button>
+            <Button
+              onClick={() => handleUploadPhoto("camera")}
+              className="h-20 flex flex-col items-center justify-center bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+            >
+              <CreditCard className="h-6 w-6 mb-2" />
+              Take a Photo
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadPhotoDialogOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add Payment Method Dialog */}
+      <Dialog open={addPaymentMethodDialogOpen} onOpenChange={setAddPaymentMethodDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add payment method</DialogTitle>
+            <DialogDescription>
+              Note: Some payment providers issue a temporary authorization charge.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="card-number">Card Number</Label>
+              <Input
+                id="card-number"
+                placeholder="1234 5678 9123 4567"
+                value={newCardData.cardNumber}
+                onChange={(e) => setNewCardData({ ...newCardData, cardNumber: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="expiry">Expiration</Label>
+                <Input
+                  id="expiry"
+                  placeholder="MM / YY"
+                  value={newCardData.expiry}
+                  onChange={(e) => setNewCardData({ ...newCardData, expiry: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cvc">CVC</Label>
+                <Input
+                  id="cvc"
+                  placeholder="•••"
+                  value={newCardData.cvc}
+                  onChange={(e) => setNewCardData({ ...newCardData, cvc: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="card-name">Cardholder Name</Label>
+              <Input
+                id="card-name"
+                placeholder="John Johnson"
+                value={newCardData.name}
+                onChange={(e) => setNewCardData({ ...newCardData, name: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter className="flex justify-between">
+            <Button variant="outline" onClick={() => setAddPaymentMethodDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddPaymentMethod} className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90">
+              Add
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Confirmation Modal */}
+      <Dialog open={confirmationModalOpen} onOpenChange={setConfirmationModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Success</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-6 text-center">
+            <div className="h-20 w-20 rounded-full bg-green-100 flex items-center justify-center text-green-600 mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-10 w-10"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <p>{confirmationMessage}</p>
+          </div>
+          <DialogFooter>
+            <Button 
+              className="w-full bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+              onClick={() => setConfirmationModalOpen(false)}
+            >
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };

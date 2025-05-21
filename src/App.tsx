@@ -10,6 +10,7 @@ import ExploreClasses from "./pages/ExploreClasses";
 import ClassDetail from "./pages/ClassDetail";
 import Profile from "./pages/Profile";
 import Help from "./pages/Help";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/classes/:id" element={<ClassDetail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/help" element={<Help />} />
+          <Route path="/messages" element={<Messages />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
