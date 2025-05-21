@@ -98,8 +98,8 @@ const Dashboard = () => {
     }
   ];
 
-  // Filter out completed classes
-  const ongoingTodaysClasses = todaysClasses.filter(cls => cls.status !== "Completed");
+  // Filter out completed classes - fixed type comparison
+  const ongoingTodaysClasses = todaysClasses.filter(cls => cls.status === "Ongoing");
 
   const handleStartSession = (classId: string) => {
     // In a real app, this would navigate to the class session
