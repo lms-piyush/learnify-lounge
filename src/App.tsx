@@ -11,6 +11,7 @@ import ClassDetail from "./pages/ClassDetail";
 import Profile from "./pages/Profile";
 import Help from "./pages/Help";
 import Messages from "./pages/Messages";
+import TutorProfile from "./pages/TutorProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/help" element={<Help />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/tutor/:id" element={<TutorProfile />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

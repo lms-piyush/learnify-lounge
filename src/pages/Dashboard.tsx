@@ -48,8 +48,11 @@ const Dashboard = () => {
     { name: "Not Started", value: 6, color: "#E5D0FF" }
   ];
 
-  // Sample data for popular courses
-  const popularCourses = [
+  // Calculate total courses for chart center
+  const totalCourses = chartData.reduce((sum, item) => sum + item.value, 0);
+
+  // Sample data for new courses (limited to 3)
+  const newCourses = [
     {
       id: "course1",
       title: "Introduction to Python",
@@ -70,13 +73,6 @@ const Dashboard = () => {
       tutor: "Sarah Lee",
       rating: 4.9,
       image: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=300"
-    },
-    {
-      id: "course4",
-      title: "Data Science Fundamentals",
-      tutor: "Michael Chang",
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&w=300"
     }
   ];
 
@@ -140,23 +136,23 @@ const Dashboard = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Course Distribution Chart */}
-        <CourseDistributionChart data={chartData} />
+        <CourseDistributionChart data={chartData} totalCourses={totalCourses} />
         
-        {/* Popular Courses Section */}
+        {/* New Courses Section */}
         <div className="lg:col-span-2">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Popular Courses</h2>
+            <h2 className="text-xl font-semibold">New Courses</h2>
             <Button 
               variant="outline" 
               className="text-[#8A5BB7] border-[#8A5BB7]"
-              onClick={() => navigate("/explore?filter=popular")}
+              onClick={() => navigate("/explore?filter=new")}
             >
-              See All Classes
+              View All Courses
             </Button>
           </div>
           
-          <div className="flex overflow-x-auto gap-4 pb-2">
-            {popularCourses.map((course) => (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[220px]">
+            {newCourses.map((course) => (
               <CourseCard
                 key={course.id}
                 {...course}

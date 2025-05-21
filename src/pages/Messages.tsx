@@ -4,7 +4,9 @@ import Layout from "@/components/layout/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Send, MessageSquare, User } from "lucide-react";
+import { Search, Send, MessageSquare } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
 
 interface Message {
   id: string;
@@ -22,9 +24,12 @@ interface Conversation {
   lastMessageTime: string;
   messages: Message[];
   avatarUrl?: string;
+  tutorId: string;
 }
 
 const Messages = () => {
+  const navigate = useNavigate();
+  
   const [conversations, setConversations] = useState<Conversation[]>([
     {
       id: "1",
@@ -34,6 +39,7 @@ const Messages = () => {
       unread: true,
       lastMessageTime: "10:32 AM",
       avatarUrl: undefined,
+      tutorId: "tutor1",
       messages: [
         {
           id: "m1",
@@ -75,6 +81,7 @@ const Messages = () => {
       unread: false,
       lastMessageTime: "Yesterday",
       avatarUrl: undefined,
+      tutorId: "tutor2",
       messages: [
         {
           id: "m1",
@@ -104,6 +111,7 @@ const Messages = () => {
       unread: false,
       lastMessageTime: "2 days ago",
       avatarUrl: undefined,
+      tutorId: "tutor3",
       messages: [
         {
           id: "m1",
@@ -204,59 +212,76 @@ const Messages = () => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
   
+  const handleViewTutorProfile = (tutorId: string) => {
+    navigate(`/tutor/${tutorId}`);
+  };
+  
   return (
     <Layout>
       <div className="flex flex-col h-[calc(100vh-4rem)]">
-        <h1 className="text-2xl font-bold mb-6">Messages</h1>
-        <div className="flex flex-1 border rounded-lg overflow-hidden">
+        <h1 className="text-2xl font-bold mb-4">Messages</h1>
+        <div className="flex flex-1 border rounded-lg overflow-hidden h-[calc(100vh-8rem)]">
           {/* Conversations List */}
-          <div className="w-full sm:w-1/3 lg:w-1/4 border-r">
+          <div className="w-full sm:w-1/3 lg:w-1/4 border-r flex flex-col">
             <div className="p-4 border-b">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input 
                   type="text" 
                   placeholder="Search conversations..." 
-                  className="pl-10"
+                  className="pl-10 focus:border-[#8A5BB7] hover:bg-[#E5D0FF]"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </div>
-            <div className="overflow-y-auto h-[calc(100vh-15rem)]">
-              {filteredConversations.length > 0 ? (
-                filteredConversations.map(conversation => (
-                  <div 
-                    key={conversation.id}
-                    className={`flex items-start gap-3 p-4 border-b cursor-pointer hover:bg-[#E5D0FF] ${activeConversation.id === conversation.id ? 'bg-[#E5D0FF]' : ''}`}
-                    onClick={() => setActiveConversation(conversation)}
-                  >
-                    <Avatar>
-                      <AvatarImage src={conversation.avatarUrl} />
-                      <AvatarFallback className="bg-[#8A5BB7] text-white">
-                        {conversation.tutorName.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-baseline">
-                        <h3 className="font-medium text-sm truncate">{conversation.tutorName}</h3>
-                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{conversation.lastMessageTime}</span>
+            <ScrollArea className="flex-1">
+              <div className="h-full">
+                {filteredConversations.length > 0 ? (
+                  filteredConversations.map(conversation => (
+                    <div 
+                      key={conversation.id}
+                      className={`flex items-start gap-3 p-4 border-b cursor-pointer hover:bg-[#E5D0FF] ${activeConversation.id === conversation.id ? 'bg-[#E5D0FF]' : ''}`}
+                      onClick={() => setActiveConversation(conversation)}
+                    >
+                      <Avatar className="cursor-pointer" onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewTutorProfile(conversation.tutorId);
+                      }}>
+                        <AvatarImage src={conversation.avatarUrl} />
+                        <AvatarFallback className="bg-[#8A5BB7] text-white">
+                          {conversation.tutorName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-baseline">
+                          <h3 
+                            className="font-medium text-sm truncate cursor-pointer hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewTutorProfile(conversation.tutorId);
+                            }}
+                          >
+                            {conversation.tutorName}
+                          </h3>
+                          <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{conversation.lastMessageTime}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground truncate">{conversation.courseName}</p>
+                        <p className="text-sm truncate">{conversation.lastMessage}</p>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">{conversation.courseName}</p>
-                      <p className="text-sm truncate">{conversation.lastMessage}</p>
+                      {conversation.unread && (
+                        <div className="h-2 w-2 bg-[#8A5BB7] rounded-full self-center"></div>
+                      )}
                     </div>
-                    {conversation.unread && (
-                      <div className="h-2 w-2 bg-[#8A5BB7] rounded-full self-center"></div>
-                    )}
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-8 text-center">
+                    <MessageSquare className="h-10 w-10 text-gray-400 mb-2" />
+                    <p className="text-muted-foreground">No conversations found</p>
                   </div>
-                ))
-              ) : (
-                <div className="flex flex-col items-center justify-center p-8 text-center">
-                  <MessageSquare className="h-10 w-10 text-gray-400 mb-2" />
-                  <p className="text-muted-foreground">No conversations found</p>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            </ScrollArea>
           </div>
           
           {/* Message Thread */}
@@ -266,60 +291,70 @@ const Messages = () => {
                 {/* Conversation Header */}
                 <div className="p-4 border-b flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Avatar>
+                    <Avatar 
+                      className="cursor-pointer"
+                      onClick={() => handleViewTutorProfile(activeConversation.tutorId)}
+                    >
                       <AvatarImage src={activeConversation.avatarUrl} />
                       <AvatarFallback className="bg-[#8A5BB7] text-white">
                         {activeConversation.tutorName.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <h2 className="font-medium">{activeConversation.tutorName}</h2>
+                      <h2 
+                        className="font-medium cursor-pointer hover:underline"
+                        onClick={() => handleViewTutorProfile(activeConversation.tutorId)}
+                      >
+                        {activeConversation.tutorName}
+                      </h2>
                       <p className="text-xs text-muted-foreground">{activeConversation.courseName}</p>
                     </div>
                   </div>
                 </div>
                 
                 {/* Messages */}
-                <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-4 h-[calc(100vh-20rem)]">
-                  {activeConversation.messages.map(message => (
-                    <div 
-                      key={message.id}
-                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div className={`flex ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} items-start gap-2 max-w-[80%]`}>
-                        {message.sender === 'tutor' && (
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={activeConversation.avatarUrl} />
-                            <AvatarFallback className="bg-[#8A5BB7] text-white text-xs">
-                              {activeConversation.tutorName.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
-                        
-                        <div className="flex flex-col">
-                          <div className={`p-3 rounded-lg text-sm ${
-                            message.sender === 'user' 
-                              ? 'bg-[#8A5BB7] text-white rounded-tr-none' 
-                              : 'bg-gray-100 text-gray-900 rounded-tl-none'
-                          }`}>
-                            {message.text}
+                <ScrollArea className="flex-1">
+                  <div className="p-4 flex flex-col gap-4">
+                    {activeConversation.messages.map(message => (
+                      <div 
+                        key={message.id}
+                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        <div className={`flex ${message.sender === 'user' ? 'flex-row-reverse' : 'flex-row'} items-start gap-2 max-w-[80%]`}>
+                          {message.sender === 'tutor' && (
+                            <Avatar className="h-8 w-8 cursor-pointer" onClick={() => handleViewTutorProfile(activeConversation.tutorId)}>
+                              <AvatarImage src={activeConversation.avatarUrl} />
+                              <AvatarFallback className="bg-[#8A5BB7] text-white text-xs">
+                                {activeConversation.tutorName.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
+                          
+                          <div className="flex flex-col">
+                            <div className={`p-3 rounded-lg text-sm ${
+                              message.sender === 'user' 
+                                ? 'bg-[#8A5BB7] text-white rounded-tr-none' 
+                                : 'bg-gray-100 text-gray-900 rounded-tl-none'
+                            }`}>
+                              {message.text}
+                            </div>
+                            <span className={`text-xs text-gray-500 mt-1 ${message.sender === 'user' ? 'text-right mr-2' : 'ml-2'}`}>
+                              {formatMessageTime(message.timestamp)}
+                            </span>
                           </div>
-                          <span className={`text-xs text-gray-500 mt-1 ${message.sender === 'user' ? 'text-right mr-2' : 'ml-2'}`}>
-                            {formatMessageTime(message.timestamp)}
-                          </span>
+                          
+                          {message.sender === 'user' && (
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-purple-200 text-[#8A5BB7] text-xs">
+                                ME
+                              </AvatarFallback>
+                            </Avatar>
+                          )}
                         </div>
-                        
-                        {message.sender === 'user' && (
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-purple-200 text-[#8A5BB7] text-xs">
-                              ME
-                            </AvatarFallback>
-                          </Avatar>
-                        )}
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                </ScrollArea>
                 
                 {/* Message Input */}
                 <div className="p-4 border-t">
@@ -332,7 +367,7 @@ const Messages = () => {
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleSendMessage();
                       }}
-                      className="flex-1"
+                      className="flex-1 focus:border-[#8A5BB7] hover:bg-[#E5D0FF]"
                     />
                     <Button 
                       onClick={handleSendMessage}
