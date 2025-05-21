@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,13 +18,30 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Filter,
   Star,
   Heart,
+  MessageCircle,
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ClassCardProps {
   id: string;
@@ -42,8 +59,7 @@ interface ClassCardProps {
   classSize: string;
   onClick: () => void;
   onTutorClick: () => void;
-  wishListed?: boolean;
-  onWishlistToggle: () => void;
+  onMessageTutor: () => void;
 }
 
 const ClassCard = ({
@@ -61,25 +77,17 @@ const ClassCard = ({
   classSize,
   onClick,
   onTutorClick,
-  wishListed = false,
-  onWishlistToggle,
+  onMessageTutor,
 }: ClassCardProps) => {
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewText, setReviewText] = useState("");
+
   return (
-    <Card className="overflow-hidden hover:shadow-md transition-shadow">
+    <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
       <div className="flex flex-col md:flex-row h-full">
         <div className="relative h-40 md:h-auto md:w-1/3 lg:w-1/4">
           <img src={image} alt={title} className="h-full w-full object-cover" />
-          <button 
-            className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              onWishlistToggle();
-            }}
-          >
-            <Heart 
-              className={`h-5 w-5 ${wishListed ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} 
-            />
-          </button>
         </div>
         <CardContent className="p-4 flex flex-col flex-1" onClick={onClick}>
           <div className="flex justify-between">
@@ -127,21 +135,90 @@ const ClassCard = ({
                 {format}
               </span>
               <span className="px-2 py-1 rounded-full bg-gray-100">
-                {classSize}
-              </span>
-              <span className="px-2 py-1 rounded-full bg-gray-100">
-                Students: {students}
+                {classSize === "Group" ? `Students: ${students}` : "1-on-1"}
               </span>
             </div>
-            <Button 
-              size="sm" 
-              className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
-            >
-              {status === "Completed" ? "View Certificate" : "Continue"}
-            </Button>
+            <div className="flex space-x-2">
+              <Button 
+                size="sm" 
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMessageTutor();
+                }}
+              >
+                <MessageCircle className="h-4 w-4 mr-1" />
+                Message
+              </Button>
+              {status === "Completed" ? (
+                <Button 
+                  size="sm" 
+                  className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setReviewDialogOpen(true);
+                  }}
+                >
+                  Submit Review
+                </Button>
+              ) : (
+                <Button 
+                  size="sm" 
+                  className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+                >
+                  {type === "Online" ? "Continue" : "View Class"}
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </div>
+      
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Submit Your Review</DialogTitle>
+            <DialogDescription>
+              Share your experience with this class to help other learners.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex justify-center space-x-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star 
+                  key={star}
+                  className={`h-8 w-8 cursor-pointer ${reviewRating >= star ? "fill-yellow-400 stroke-yellow-400" : "stroke-gray-300"}`}
+                  onClick={() => setReviewRating(star)}
+                />
+              ))}
+            </div>
+            
+            <Textarea 
+              placeholder="Write your feedback about the class..."
+              value={reviewText}
+              onChange={(e) => setReviewText(e.target.value)}
+              className="min-h-32"
+            />
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewDialogOpen(false)}>Cancel</Button>
+            <Button 
+              className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+              onClick={() => {
+                // Submit review logic would go here
+                setReviewDialogOpen(false);
+                // Reset form
+                setReviewText("");
+                setReviewRating(5);
+              }}
+            >
+              Submit Review
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
@@ -155,9 +232,8 @@ const MyClasses = () => {
   const [classMode, setClassMode] = useState<"online" | "offline">("online");
   const [classFormat, setClassFormat] = useState<"live" | "recorded" | "inbound" | "outbound">("live");
   const [classSize, setClassSize] = useState<"group" | "1-on-1">("group");
-  
-  // Wishlist state
-  const [wishlistedClasses, setWishlistedClasses] = useState<string[]>(["class2"]);
+  const [classDuration, setClassDuration] = useState<"finite" | "infinite">("finite");
+  const [paymentModel, setPaymentModel] = useState<"one-time" | "subscription">("one-time");
   
   // Sample class data
   const classes = [
@@ -207,24 +283,34 @@ const MyClasses = () => {
       classSize: "Group",
     },
   ];
+    
+  // Effect to handle format options based on class mode
+  useEffect(() => {
+    if (classMode === "online") {
+      setClassFormat("live");
+    } else {
+      setClassFormat("inbound");
+    }
+  }, [classMode]);
+
+  // Effect to handle class size options based on format
+  useEffect(() => {
+    if (classFormat === "outbound") {
+      setClassSize("1-on-1");
+    }
+  }, [classFormat]);
   
-  // Handle wishlist toggle
-  const toggleWishlist = (classId: string) => {
-    setWishlistedClasses((prev) => 
-      prev.includes(classId) 
-        ? prev.filter(id => id !== classId) 
-        : [...prev, classId]
-    );
-  };
+  // Effect to handle payment model based on duration
+  useEffect(() => {
+    if (classDuration === "infinite") {
+      setPaymentModel("subscription");
+    }
+  }, [classDuration]);
   
   const filteredClasses = classes.filter(cls => {
     // Filter by tab
-    if (activeTab === "saved") {
-      return wishlistedClasses.includes(cls.id);
-    } else if (activeTab === "enrolled") {
-      return cls.status === "Enrolled";
-    } else if (activeTab === "ongoing") {
-      return cls.status === "Ongoing";
+    if (activeTab === "ongoing") {
+      return cls.status === "Ongoing" || cls.status === "Enrolled";
     } else if (activeTab === "completed") {
       return cls.status === "Completed";
     } else {
@@ -255,22 +341,6 @@ const MyClasses = () => {
     return true;
   });
   
-  // Effect to handle format options based on class mode
-  React.useEffect(() => {
-    if (classMode === "online") {
-      setClassFormat("live");
-    } else {
-      setClassFormat("inbound");
-    }
-  }, [classMode]);
-
-  // Effect to handle class size options based on format
-  React.useEffect(() => {
-    if (classFormat === "outbound") {
-      setClassSize("1-on-1");
-    }
-  }, [classFormat]);
-  
   return (
     <Layout>
       <h1 className="text-2xl font-bold mb-6">My Classes</h1>
@@ -280,23 +350,21 @@ const MyClasses = () => {
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="enrolled">Enrolled</TabsTrigger>
               <TabsTrigger value="ongoing">Ongoing</TabsTrigger>
               <TabsTrigger value="completed">Completed</TabsTrigger>
-              <TabsTrigger value="saved">Saved</TabsTrigger>
             </TabsList>
             
-            <Drawer open={filterOpen} onOpenChange={setFilterOpen}>
-              <DrawerTrigger asChild>
+            <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+              <SheetTrigger asChild>
                 <Button variant="outline" size="sm" className="ml-2">
                   <Filter className="h-4 w-4 mr-2" />
                   Filter
                 </Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>Filters</DrawerTitle>
-                </DrawerHeader>
+              </SheetTrigger>
+              <SheetContent className="overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>Filters</SheetTitle>
+                </SheetHeader>
                 <div className="p-4 space-y-6">
                   {/* Class Mode */}
                   <div className="space-y-2">
@@ -379,17 +447,58 @@ const MyClasses = () => {
                   
                   <Separator />
                   
+                  {/* Class Duration */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Class Duration</h3>
+                    <RadioGroup 
+                      value={classDuration} 
+                      onValueChange={(value) => setClassDuration(value as "finite" | "infinite")}
+                      className="flex flex-col space-y-1"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="finite" id="duration-finite" />
+                        <Label htmlFor="duration-finite">Finite classes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="infinite" id="duration-infinite" />
+                        <Label htmlFor="duration-infinite">Infinite classes</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  
+                  <Separator />
+                  
+                  {/* Payment Model */}
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Payment Model</h3>
+                    <RadioGroup 
+                      value={paymentModel} 
+                      onValueChange={(value) => setPaymentModel(value as "one-time" | "subscription")}
+                      className="flex flex-col space-y-1"
+                      disabled={classDuration === "infinite"}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="one-time" id="payment-onetime" disabled={classDuration === "infinite"} />
+                        <Label htmlFor="payment-onetime" className={classDuration === "infinite" ? "text-gray-400" : ""}>One-time payment</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="subscription" id="payment-subscription" />
+                        <Label htmlFor="payment-subscription">Subscription</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                  
                   <div className="flex justify-end pt-4">
                     <Button 
                       className="bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
                       onClick={() => setFilterOpen(false)}
                     >
-                      Apply Filters
+                      Save Filters
                     </Button>
                   </div>
                 </div>
-              </DrawerContent>
-            </Drawer>
+              </SheetContent>
+            </Sheet>
           </div>
           
           <TabsContent value={activeTab} className="mt-6">
@@ -399,10 +508,9 @@ const MyClasses = () => {
                   <ClassCard
                     key={cls.id}
                     {...cls}
-                    wishListed={wishlistedClasses.includes(cls.id)}
                     onClick={() => navigate(`/classes/${cls.id}`)}
                     onTutorClick={() => navigate(`/tutor/${cls.tutorId}`)}
-                    onWishlistToggle={() => toggleWishlist(cls.id)}
+                    onMessageTutor={() => navigate(`/messages?tutor=${cls.tutorId}`)}
                   />
                 ))
               ) : (
@@ -417,4 +525,3 @@ const MyClasses = () => {
 };
 
 export default MyClasses;
-
