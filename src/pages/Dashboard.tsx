@@ -7,7 +7,7 @@ import CourseDistributionChart from "@/components/dashboard/CourseDistributionCh
 import CourseCard from "@/components/dashboard/CourseCard";
 import ClassesTable from "@/components/dashboard/ClassesTable";
 import { Button } from "@/components/ui/button";
-import { Calendar, Book, Star } from "lucide-react";
+import { Calendar, Book, Star, BookOpen } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 const Dashboard = () => {
@@ -17,7 +17,7 @@ const Dashboard = () => {
   const stats = [
     {
       title: "Today's Classes",
-      value: 3,
+      value: 2,
       icon: <Calendar className="h-5 w-5" />,
       delta: { value: 50, isPositive: true },
       onClick: () => {
@@ -76,7 +76,7 @@ const Dashboard = () => {
     }
   ];
 
-  // Sample data for today's classes
+  // Sample data for today's classes - UPDATED to only show non-completed classes for today
   const todaysClasses = [
     {
       id: "class1",
@@ -88,15 +88,6 @@ const Dashboard = () => {
       isStartable: true
     },
     {
-      id: "class2",
-      name: "Imaginary Numbers",
-      type: "Online" as const,
-      status: "Completed" as const,
-      format: "Recorded" as const,
-      time: "08:00 AM - 09:30 AM",
-      isStartable: false
-    },
-    {
       id: "class3",
       name: "Chemistry Lab",
       type: "Offline" as const,
@@ -106,6 +97,9 @@ const Dashboard = () => {
       isStartable: false
     }
   ];
+
+  // Filter out completed classes
+  const ongoingTodaysClasses = todaysClasses.filter(cls => cls.status !== "Completed");
 
   const handleStartSession = (classId: string) => {
     // In a real app, this would navigate to the class session
@@ -139,7 +133,7 @@ const Dashboard = () => {
         <CourseDistributionChart data={chartData} totalCourses={totalCourses} />
         
         {/* New Courses Section (renamed from Popular Courses) */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 flex flex-col h-full">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">New Courses</h2>
             <Button 
@@ -151,7 +145,7 @@ const Dashboard = () => {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[220px] overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-grow">
             {newCourses.map((course) => (
               <CourseCard
                 key={course.id}
@@ -160,16 +154,43 @@ const Dashboard = () => {
               />
             ))}
           </div>
+
+          <div className="mt-auto">
+            <Button 
+              variant="outline" 
+              className="w-full mt-4 text-[#8A5BB7] border-[#8A5BB7] md:hidden"
+              onClick={() => navigate("/explore?filter=new")}
+            >
+              View All Courses
+            </Button>
+          </div>
         </div>
       </div>
       
-      {/* Today's Classes Table */}
+      {/* Today's Classes Table - Updated to show empty state when no classes */}
       <div id="todaysClasses" className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Today's Classes</h2>
-        <ClassesTable 
-          classes={todaysClasses} 
-          onStartSession={handleStartSession}
-        />
+        
+        {ongoingTodaysClasses.length > 0 ? (
+          <ClassesTable 
+            classes={ongoingTodaysClasses} 
+            onStartSession={handleStartSession}
+          />
+        ) : (
+          <div className="bg-white border border-gray-200 rounded-md p-8 text-center">
+            <div className="flex flex-col items-center justify-center">
+              <BookOpen className="h-12 w-12 text-[#8A5BB7] mb-4" />
+              <p className="text-lg font-medium mb-2">No classes scheduled for today.</p>
+              <p className="text-gray-500">Enjoy your day or explore new courses!</p>
+              <Button 
+                className="mt-6 bg-[#8A5BB7] hover:bg-[#8A5BB7]/90"
+                onClick={() => navigate("/explore")}
+              >
+                Explore Courses
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );
