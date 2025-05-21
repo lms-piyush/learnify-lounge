@@ -11,13 +11,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import {
   Sheet,
   SheetContent,
   SheetHeader,
@@ -35,7 +28,6 @@ import {
 import {
   Filter,
   Star,
-  Heart,
   MessageCircle,
 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -245,7 +237,7 @@ const MyClasses = () => {
       type: "Online",
       format: "Live",
       payment: "Fixed",
-      status: "Ongoing",
+      status: "Active",
       students: 15,
       image: "https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=300",
       rating: 4.8,
@@ -309,8 +301,8 @@ const MyClasses = () => {
   
   const filteredClasses = classes.filter(cls => {
     // Filter by tab
-    if (activeTab === "ongoing") {
-      return cls.status === "Ongoing" || cls.status === "Enrolled";
+    if (activeTab === "active") {
+      return cls.status === "Active" || cls.status === "Enrolled";
     } else if (activeTab === "completed") {
       return cls.status === "Completed";
     } else {
@@ -350,7 +342,7 @@ const MyClasses = () => {
           <div className="flex justify-between items-center">
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
-              <TabsTrigger value="ongoing">Ongoing</TabsTrigger>
+              <TabsTrigger value="active">Active Courses</TabsTrigger>
               <TabsTrigger value="completed">Completed</TabsTrigger>
             </TabsList>
             
